@@ -85,7 +85,7 @@ export class RenderCore {
             let tickingAreaName = null;
             if (keepLoaded) {
                 tickingAreaName = `kfa_ticking_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-                // Create a 2-chunk radius ticking area around origin. 
+                // Create a 2-chunk radius ticking area around origin.
                 // Note: 'circle' with radius 2 is ~4 chunks wide. Safe enough for most animations.
                 // We run it async and catch failures (e.g. limit of 10 reached)
                 dimension.runCommandAsync(`tickingarea add circle ${finalOrigin.x} ${finalOrigin.y} ${finalOrigin.z} 2 ${tickingAreaName}`)
@@ -128,7 +128,7 @@ export class RenderCore {
 
             this.activeRenders.set(playbackId, state);
             if (player) Logger.info(player, `Starting playback of §l${state.animationId}§r (§e${mode}§f)`);
-            
+
             // Phase 10: Camera API Syncing
             if (player && state.data.cameraMarkers) {
                 const markers = state.data.cameraMarkers;
@@ -154,7 +154,7 @@ export class RenderCore {
 
     instantiatePrefab(player, animId, location, rotation = 0) {
         if (!player || !animId || !location) return;
-        
+
         const rawData = SequenceVault.load(animId);
         if (!rawData || !rawData.frames || rawData.frames.length === 0) {
             Logger.error(player, "Failed to load animation or it has no frames.");
@@ -171,9 +171,9 @@ export class RenderCore {
         const dimension = player.dimension;
         const frame = RenderCore.rebuildFrame(animData, 0);
         const palette = animData.palette;
-        
+
         let blockCount = 0;
-        
+
         const runPaste = () => {
             for (const [relPos, paletteIdx] of Object.entries(frame)) {
                 if (relPos === "offset" || relPos === "boxSize" || relPos === "commands" || relPos === "effects") continue;
@@ -359,16 +359,16 @@ export class RenderCore {
 
                 const maxUpdates = Math.floor(this.adaptiveMaxUpdates * state.budgetFactor);
                 const updatesThisTick = state.pendingBlocks.splice(0, maxUpdates);
-                
-                const isFinalFrame = (state.currentFrame === state.data.frames.length - 1 && state.direction === 1) || 
+
+                const isFinalFrame = (state.currentFrame === state.data.frames.length - 1 && state.direction === 1) ||
                                      (state.currentFrame === 0 && state.direction === -1);
 
                 const tStart = Date.now();
                 this.applyBlocks(state, updatesThisTick, isFinalFrame);
                 const tEnd = Date.now();
-                
+
                 // --- Task 4: Adaptive Health Check ---
-                // Adjust MAX_UPDATES based on tick duration. 
+                // Adjust MAX_UPDATES based on tick duration.
                 // If duration is extremely high, drop limit significantly to allow recovery.
                 const duration = tEnd - tStart;
                 if (duration > RenderCore.TARGET_TICK_MS * 1.5) {
@@ -473,7 +473,7 @@ export class RenderCore {
 
         for (const [relPos, data] of updatesThisTick) {
             const { x: rx, y: ry, z: rz } = MathOps.unpack(relPos);
-            
+
             let pIdx = data;
             if (state.swaps.has(data)) {
                 pIdx = state.swaps.get(data);
@@ -492,12 +492,17 @@ export class RenderCore {
             // Selective Entity Rendering (Shell Culling & LOD)
             // If shellBlocks is defined, only those blocks use entities.
             // distanceLOD: If player is > 30 blocks away, force voxel mode for performance.
-            const shouldBeEntity = (shellBlocks ? shellBlocks.has(relPos) : useEntities) && distanceLOD;
+            let shouldBeEntity = (shellBlocks ? shellBlocks.has(relPos) : useEntities) && distanceLOD;
+
+            // Solidify back to real blocks on the final frame if playback stops here
+            if (forceAll && state.mode === "once") {
+                shouldBeEntity = false;
+            }
 
             if (shouldBeEntity) {
                 if (blockData.type === "minecraft:air") continue;
                 if (!state.interpolationEntities) state.interpolationEntities = new Map();
-                
+
                 // --- Task 1: High-Speed Group Cycling (O(1)) ---
                 // Using bits from the packed relPos to ensure deterministic tick assignment without list searching.
                 const bitIdx = parseInt(relPos, 36);
@@ -508,7 +513,7 @@ export class RenderCore {
 
                 // GHOST FRAME PREDICTION: Calculate velocity for next update
                 let vel = { x: 0, y: 0, z: 0 };
-                
+
                 // Task 3: Inertia Kill (Force zero velocity on final frame to prevent drift)
                 if (!forceAll) {
                     const nextFrameIdx = state.currentFrame + state.direction;
@@ -559,7 +564,7 @@ export class RenderCore {
                     entity.setProperty("bsm:vel_y", vel.y);
                     entity.setProperty("bsm:vel_z", vel.z);
                 }
-                continue; 
+                // HYBRID SHADOW SYSTEM: Do NOT continue. Fall through to place a physical barrier.
             } else if (state.interpolationEntities && state.interpolationEntities.has(relPos)) {
                 // LOD Transition: Kill entity if we switched to voxel mode
                 const entity = state.interpolationEntities.get(relPos);
@@ -581,7 +586,11 @@ export class RenderCore {
                 let typeToPlace = blockData.type;
                 let statesToPlace = blockData.states;
 
-                if (blockData.role === "collision-only") {
+                // Replace visuals with invisible collision if the entity is handling visuals
+                if (shouldBeEntity) {
+                    typeToPlace = "minecraft:barrier";
+                    statesToPlace = {};
+                } else if (blockData.role === "collision-only") {
                     typeToPlace = "minecraft:barrier";
                     statesToPlace = {};
                 }
