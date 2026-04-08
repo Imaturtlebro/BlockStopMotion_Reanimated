@@ -29,9 +29,23 @@ class AutoCaptureEngine {
             }, interval);
             Logger.info(player, `§aAuto-Capture: TIME§f (Every §e${interval}§f ticks)`);
         } else if (mode === "LIVE") {
-            Logger.info(player, "§aAuto-Capture: LIVE§f (Instant)");
+            state.autoCapture.taskId = system.runInterval(() => {
+                if (!state.isRecording) {
+                    this.stop(player, state);
+                    return;
+                }
+                core.captureFrame(player);
+            }, 1);
+            Logger.info(player, "§aAuto-Capture: LIVE§f (Every tick)");
         } else if (mode === "QUOTA") {
-            Logger.info(player, `§aAuto-Capture: QUOTA§f (Every §e${threshold}§f blocks)`);
+            state.autoCapture.taskId = system.runInterval(() => {
+                if (!state.isRecording) {
+                    this.stop(player, state);
+                    return;
+                }
+                this.processQuota(player, core, state);
+            }, 1);
+            Logger.info(player, `§aAuto-Capture: QUOTA§f (Every §e${threshold}§f ticks)`);
         }
     }
 

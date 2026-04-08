@@ -124,12 +124,12 @@ export class MenuCapture {
 
         form.show(player).then(res => {
             try {
-                if (res.canceled) { menuDirector.showMainMenu(player); return; }
+                if (res.canceled) { this.showCaptureTools(player); return; }
                 const [modeIdx, threshold] = res.formValues;
                 const modeMap = ["TIME", "LIVE", "QUOTA"];
 
                 recordingEngine.startAutoCapture(player, modeMap[modeIdx], threshold);
-                menuDirector.showMainMenu(player);
+                this.showCaptureTools(player);
             } catch (e) { Logger.trace("UI", "MenuCapture.showAutoCaptureMenu", null, e); }
         });
     }
@@ -147,7 +147,7 @@ export class MenuCapture {
 
         form.show(player).then(res => {
             try {
-                if (res.canceled || res.selection === 3) { menuDirector.showMainMenu(player); return; }
+                if (res.canceled || res.selection === 3) { this.showCaptureTools(player); return; }
                 if (res.selection === 0) {
                     Logger.info(player, "§eRevealing bounds... §7(Check for particles)");
                     RegionHighlighter.drawBox(player.dimension, state.pos1, state.pos2, "minecraft:end_rod", 100);
@@ -205,7 +205,7 @@ export class MenuCapture {
 
         form.show(player).then(res => {
             try {
-                if (res.canceled || res.selection === 13) { menuDirector.showMainMenu(player); return; }
+                if (res.canceled || res.selection === 13) { this.showCaptureTools(player); return; }
                 switch (res.selection) {
                     case 0: this.moveRecordingArea(player); break;
                     case 1: this.showTemplateMenu(player); break;

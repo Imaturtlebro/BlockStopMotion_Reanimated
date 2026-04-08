@@ -162,7 +162,7 @@ export class MenuDirector {
                 if (res.canceled) return;
                 const data = targetBlock ? NodeDataManager.getBlockData(targetBlock) : null;
                 const hasData = (data && data.animationId);
-                const backIdx = activeRecording ? 5 : (targetBlock ? (hasData ? 10 : 8) : 8);
+                const backIdx = activeRecording ? 5 : (targetBlock ? (hasData ? 10 : 8) : 9);
                 if (res.selection === backIdx) return;
 
                 if (activeRecording) {

@@ -10,7 +10,9 @@ export class NodeDataManager {
         const data = world.getDynamicProperty(blockKey);
         try {
             const parsed = data ? JSON.parse(data) : {};
-            console.warn(`[BSM][NodeDataManager] getBlockData: key=${blockKey}, hasData=${!!data}, animId=${parsed.animationId || 'none'}`);
+            if (data) {
+                console.warn(`[BSM][NodeDataManager] getBlockData: key=${blockKey}, animId=${parsed.animationId || 'none'}`);
+            }
             return parsed;
         } catch (e) {
             console.warn(`[BSM][NodeDataManager] getBlockData: PARSE ERROR for key=${blockKey}`);

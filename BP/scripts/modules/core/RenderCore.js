@@ -513,67 +513,63 @@ export class RenderCore {
             if (shouldBeEntity) {
                 if (blockData.type === "minecraft:air") continue;
                 if (!state.interpolationEntities) state.interpolationEntities = new Map();
-                
-                // --- Task 1: High-Speed Group Cycling (O(1)) ---
-                // Using bits from the packed relPos to ensure deterministic tick assignment without list searching.
-                const bitIdx = parseInt(relPos, 36);
-                if (!forceAll && (bitIdx % 4) !== groupIndex) continue;
 
-                let entity = state.interpolationEntities.get(relPos);
+                const bitIdx = parseInt(relPos, 36);
+                const entity = state.interpolationEntities.get(relPos);
+                const entityDue = forceAll || !entity || !entity.isValid() || ((bitIdx % 4) === groupIndex);
                 const spawnPos = { x: targetPos.x + 0.5, y: targetPos.y, z: targetPos.z + 0.5 };
 
-                // GHOST FRAME PREDICTION: Calculate velocity for next update
-                let vel = { x: 0, y: 0, z: 0 };
-                
-                // Task 3: Inertia Kill (Force zero velocity on final frame to prevent drift)
-                if (!forceAll) {
-                    const nextFrameIdx = state.currentFrame + state.direction;
-                    if (nextFrameIdx >= 0 && nextFrameIdx < state.data.frames.length) {
-                        const nextFrame = state.data.frames[nextFrameIdx];
-                        if (nextFrame[relPos] !== undefined) {
-                            const nextOffset = nextFrame.offset || state.frameOffset || { x: 0, y: 0, z: 0 };
-                            const nextPos = {
-                                x: state.origin.x + nextOffset.x + (rx - pivot.x) + 0.5,
-                                y: state.origin.y + nextOffset.y + (ry - pivot.y),
-                                z: state.origin.z + nextOffset.z + (rz - pivot.z) + 0.5
-                            };
-                            vel = {
-                                x: (nextPos.x - spawnPos.x) / 4,
-                                y: (nextPos.y - spawnPos.y) / 4,
-                                z: (nextPos.z - spawnPos.z) / 4
-                            };
+                if (entityDue) {
+                    let vel = { x: 0, y: 0, z: 0 };
+                    if (!forceAll) {
+                        const nextFrameIdx = state.currentFrame + state.direction;
+                        if (nextFrameIdx >= 0 && nextFrameIdx < state.data.frames.length) {
+                            const nextFrame = state.data.frames[nextFrameIdx];
+                            if (nextFrame[relPos] !== undefined) {
+                                const nextOffset = nextFrame.offset || state.frameOffset || { x: 0, y: 0, z: 0 };
+                                const nextPos = {
+                                    x: state.origin.x + nextOffset.x + (rx - pivot.x) + 0.5,
+                                    y: state.origin.y + nextOffset.y + (ry - pivot.y),
+                                    z: state.origin.z + nextOffset.z + (rz - pivot.z) + 0.5
+                                };
+                                vel = {
+                                    x: (nextPos.x - spawnPos.x) / 4,
+                                    y: (nextPos.y - spawnPos.y) / 4,
+                                    z: (nextPos.z - spawnPos.z) / 4
+                                };
+                            }
                         }
                     }
-                }
 
-                if (!entity || !entity.isValid()) {
-                    try {
-                        // ENTITY POOLING: Try to grab from pool first
-                        if (this.entityPool && this.entityPool.length > 0) {
-                            entity = this.entityPool.pop();
-                            if (entity.isValid()) {
-                                entity.teleport(spawnPos, { dimension });
+                    let entityObj = entity;
+                    if (!entityObj || !entityObj.isValid()) {
+                        try {
+                            if (this.entityPool && this.entityPool.length > 0) {
+                                entityObj = this.entityPool.pop();
+                                if (entityObj.isValid()) {
+                                    entityObj.teleport(spawnPos, { dimension });
+                                } else {
+                                    entityObj = dimension.spawnEntity("bsm:entity_block", spawnPos);
+                                }
                             } else {
-                                entity = dimension.spawnEntity("bsm:entity_block", spawnPos);
+                                entityObj = dimension.spawnEntity("bsm:entity_block", spawnPos);
                             }
-                        } else {
-                            entity = dimension.spawnEntity("bsm:entity_block", spawnPos);
-                        }
 
-                        const itemId = blockData.type.replace("minecraft:", "");
-                        entity.runCommandAsync(`replaceitem entity @s slot.weapon.mainhand 0 ${itemId}`);
-                        state.interpolationEntities.set(relPos, entity);
-                    } catch (e) {}
-                } else {
-                    try {
-                        entity.teleport(spawnPos, { dimension });
-                    } catch (e) {}
-                }
+                            const itemId = blockData.type.replace("minecraft:", "");
+                            entityObj.runCommandAsync(`replaceitem entity @s slot.weapon.mainhand 0 ${itemId}`);
+                            state.interpolationEntities.set(relPos, entityObj);
+                        } catch (e) {}
+                    } else {
+                        try {
+                            entityObj.teleport(spawnPos, { dimension });
+                        } catch (e) {}
+                    }
 
-                if (entity && entity.isValid()) {
-                    entity.setProperty("bsm:vel_x", vel.x);
-                    entity.setProperty("bsm:vel_y", vel.y);
-                    entity.setProperty("bsm:vel_z", vel.z);
+                    if (entityObj && entityObj.isValid()) {
+                        entityObj.setProperty("bsm:vel_x", vel.x);
+                        entityObj.setProperty("bsm:vel_y", vel.y);
+                        entityObj.setProperty("bsm:vel_z", vel.z);
+                    }
                 }
                 // HYBRID SHADOW SYSTEM: Do NOT continue. Fall through to place a physical barrier.
             } else if (state.interpolationEntities && state.interpolationEntities.has(relPos)) {
