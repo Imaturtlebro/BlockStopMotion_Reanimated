@@ -1,0 +1,21 @@
+{
+    "format_version": "1.20.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "bsm:playback_tool",
+            "menu_category": {
+                "category": "equipment"
+            }
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "bsm_playback_tool"
+            },
+            "minecraft:display_name": {
+                "value": "§bBSM: Live Preview"
+            },
+            "minecraft:stack_size": 1,
+            "minecraft:hand_equipped": true
+        }
+    }
+}

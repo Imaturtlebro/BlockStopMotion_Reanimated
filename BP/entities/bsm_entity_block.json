@@ -1,0 +1,53 @@
+{
+  "format_version": "1.19.0",
+  "minecraft:entity": {
+    "description": {
+      "identifier": "bsm:entity_block",
+      "is_spawnable": false,
+      "is_summonable": true,
+      "properties": {
+        "bsm:vel_x": { "type": "float", "default": 0.0, "range": [-100.0, 100.0], "client_sync": true },
+        "bsm:vel_y": { "type": "float", "default": 0.0, "range": [-100.0, 100.0], "client_sync": true },
+        "bsm:vel_z": { "type": "float", "default": 0.0, "range": [-100.0, 100.0], "client_sync": true }
+      }
+    },
+    "component_groups": {
+      "despawn": {
+        "minecraft:instant_despawn": {}
+      }
+    },
+    "components": {
+      "minecraft:type_family": {
+        "family": [
+          "inanimate",
+          "bsm_entity"
+        ]
+      },
+      "minecraft:equipment": {},
+      "minecraft:collision_box": {
+        "height": 0,
+        "width": 0
+      },
+      "minecraft:damage_sensor": {
+        "triggers": [
+          {
+            "deals_damage": "no"
+          }
+        ]
+      },
+      "minecraft:physics": {
+        "has_gravity": false,
+        "has_collision": false
+      }
+    },
+    "events": {
+      "despawn": {
+        "add": {
+          "component_groups": [
+            "despawn"
+          ]
+        }
+      }
+    }
+  }
+}

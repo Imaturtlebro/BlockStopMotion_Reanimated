@@ -1,0 +1,29 @@
+{
+    "format_version": 2,
+    "header": {
+        "name": "BlockStop Motion: Reanimated (Resources)",
+        "description": "Textures and client-side definitions for BSM.",
+        "uuid": "f91a21ab-479f-4437-b326-d8eb06e7e582",
+        "version": [
+            2,
+            5,
+            2
+        ],
+        "min_engine_version": [
+            1,
+            20,
+            10
+        ]
+    },
+    "modules": [
+        {
+            "type": "resources",
+            "uuid": "ba071a15-3233-4ed8-81eb-328d957c3e0e",
+            "version": [
+                2,
+                5,
+                2
+            ]
+        }
+    ]
+}

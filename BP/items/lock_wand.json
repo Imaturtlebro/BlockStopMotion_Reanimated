@@ -1,0 +1,21 @@
+{
+    "format_version": "1.20.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "bsm:lock_wand",
+            "menu_category": {
+                "category": "equipment"
+            }
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "bsm_lock_wand"
+            },
+            "minecraft:display_name": {
+                "value": "§dBSM: Lock Wand"
+            },
+            "minecraft:stack_size": 1,
+            "minecraft:hand_equipped": true
+        }
+    }
+}

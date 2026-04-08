@@ -1,0 +1,31 @@
+{
+	"format_version": "1.21.10",
+	"minecraft:block": {
+		"description": {
+			"identifier": "bsm:sequence_block",
+			"menu_category": {
+				"category": "construction",
+				"group": "itemGroup.name.structure"
+			}
+		},
+		"components": {
+			"minecraft:destructible_by_mining": {
+				"seconds_to_destroy": 0.5
+			},
+			"minecraft:destructible_by_explosion": {
+				"explosion_resistance": 10
+			},
+			"minecraft:light_emission": 5,
+			"minecraft:geometry": "minecraft:geometry.full_block",
+			"minecraft:material_instances": {
+				"*": {
+					"texture": "structure_block",
+					"render_method": "opaque"
+				}
+			},
+			"minecraft:custom_components": [
+				"bsm:sequence_block_interact"
+			]
+		}
+	}
+}

@@ -1,0 +1,21 @@
+{
+    "format_version": "1.20.10",
+    "minecraft:item": {
+        "description": {
+            "identifier": "bsm:hub_item",
+            "menu_category": {
+                "category": "equipment"
+            }
+        },
+        "components": {
+            "minecraft:icon": {
+                "texture": "bsm_hub_item"
+            },
+            "minecraft:display_name": {
+                "value": "§9BSM: Main Hub"
+            },
+            "minecraft:stack_size": 1,
+            "minecraft:hand_equipped": true
+        }
+    }
+}

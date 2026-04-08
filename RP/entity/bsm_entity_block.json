@@ -1,0 +1,43 @@
+{
+  "format_version": "1.10.0",
+  "minecraft:client_entity": {
+    "description": {
+      "identifier": "bsm:entity_block",
+      "materials": {
+        "default": "entity_alphatest"
+      },
+      "geometry": {
+        "default": "geometry.bsm_entity_block"
+      },
+      "textures": {
+        "default": "textures/entity/armor_stand"
+      },
+      "render_controllers": [
+        "controller.render.default"
+      ],
+      "animations": {
+        "scale": "animation.bsm_entity_block.scale",
+        "rotate": "animation.bsm_entity_block.rotate",
+        "smoothing": "animation.bsm_entity_block.smoothing"
+      },
+      "scripts": {
+        "initialize": [
+          "variable.bsm_vel_x = 0;",
+          "variable.bsm_vel_y = 0;",
+          "variable.bsm_vel_z = 0;"
+        ],
+        "pre_animation": [
+          "variable.bsm_vel_x = q.property('bsm:vel_x');",
+          "variable.bsm_vel_y = q.property('bsm:vel_y');",
+          "variable.bsm_vel_z = q.property('bsm:vel_z');"
+        ],
+        "animate": [
+          "scale",
+          "rotate",
+          "smoothing"
+        ]
+      },
+      "enable_attachables": true
+    }
+  }
+}

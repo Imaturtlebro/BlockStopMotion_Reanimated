@@ -1,0 +1,35 @@
+{
+  "format_version": "1.19.0",
+  "animations": {
+    "animation.bsm_entity_block.scale": {
+      "loop": true,
+      "bones": {
+        "model": {
+          "position": [-10.865, 10.82, 10.865],
+          "scale": 2.675,
+          "rotation": [-20, -45, 0]
+        }
+      }
+    },
+    "animation.bsm_entity_block.rotate": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "rotation": [0, 0, 0]
+        }
+      }
+    },
+    "animation.bsm_entity_block.smoothing": {
+      "loop": true,
+      "bones": {
+        "root": {
+          "position": [
+            "variable.bsm_vel_x * query.anim_time",
+            "variable.bsm_vel_y * query.anim_time",
+            "variable.bsm_vel_z * query.anim_time"
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,30 @@
+{
+    "resource_pack_name": "BlockStop Motion RP",
+    "texture_name": "atlas.items",
+    "texture_data": {
+        "bsm_wand_tool": {
+            "textures": "textures/items/stick"
+        },
+        "bsm_scrubber_tool": {
+            "textures": "textures/items/clock_item"
+        },
+        "bsm_hub_item": {
+            "textures": "textures/items/compass_item"
+        },
+        "bsm_remote_shutter": {
+            "textures": "textures/blocks/redstone_torch_on"
+        },
+        "bsm_nudge_hammer": {
+            "textures": "textures/items/mace"
+        },
+        "bsm_lock_wand": {
+            "textures": "textures/items/blaze_powder"
+        },
+        "bsm_playback_tool": {
+            "textures": "textures/items/amethyst_shard"
+        },
+        "bsm_user_guide": {
+            "textures": "textures/items/book"
+        }
+    }
+}
