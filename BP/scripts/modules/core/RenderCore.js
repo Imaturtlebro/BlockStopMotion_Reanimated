@@ -248,6 +248,17 @@ export class RenderCore {
             }
         }
 
+        // Solidify Hybrid Shadow System barriers if stopped manually mid-playback
+        if (state.cinematicMode && state.data && state.data.frames) {
+            try {
+                state.cinematicMode = false; // Turn off entity mode
+                const rebuilt = RenderCore.rebuildFrame(state.data, state.currentFrame);
+                this.applyBlocks(state, Object.entries(rebuilt), true); // Force solid draw
+            } catch (e) {
+                console.error(`[BSM] Failed to solidify stopped animation: ${e}`);
+            }
+        }
+
         this.activeRenders.delete(playbackId);
         if (state.player) {
             Logger.info(state.player, `Stopped playback: ${state.animationId}`);
@@ -492,7 +503,12 @@ export class RenderCore {
             // Selective Entity Rendering (Shell Culling & LOD)
             // If shellBlocks is defined, only those blocks use entities.
             // distanceLOD: If player is > 30 blocks away, force voxel mode for performance.
-            const shouldBeEntity = (shellBlocks ? shellBlocks.has(relPos) : useEntities) && distanceLOD;
+            let shouldBeEntity = (shellBlocks ? shellBlocks.has(relPos) : useEntities) && distanceLOD;
+            
+            // Solidify back to real blocks on the final frame if playback stops here
+            if (forceAll && state.mode === "once") {
+                shouldBeEntity = false;
+            }
 
             if (shouldBeEntity) {
                 if (blockData.type === "minecraft:air") continue;
@@ -559,7 +575,7 @@ export class RenderCore {
                     entity.setProperty("bsm:vel_y", vel.y);
                     entity.setProperty("bsm:vel_z", vel.z);
                 }
-                continue; 
+                // HYBRID SHADOW SYSTEM: Do NOT continue. Fall through to place a physical barrier.
             } else if (state.interpolationEntities && state.interpolationEntities.has(relPos)) {
                 // LOD Transition: Kill entity if we switched to voxel mode
                 const entity = state.interpolationEntities.get(relPos);
@@ -581,7 +597,11 @@ export class RenderCore {
                 let typeToPlace = blockData.type;
                 let statesToPlace = blockData.states;
 
-                if (blockData.role === "collision-only") {
+                // Replace visuals with invisible collision if the entity is handling visuals
+                if (shouldBeEntity) {
+                    typeToPlace = "minecraft:barrier";
+                    statesToPlace = {};
+                } else if (blockData.role === "collision-only") {
                     typeToPlace = "minecraft:barrier";
                     statesToPlace = {};
                 }
